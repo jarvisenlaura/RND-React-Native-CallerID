@@ -8,7 +8,6 @@ import {
   PermissionsAndroid,
 } from 'react-native';
 import CallDetectorManager from 'react-native-call-detection';
-
 export default class App extends React.Component {
   constructor(props) {
     super(props);
@@ -27,12 +26,11 @@ export default class App extends React.Component {
         PermissionsAndroid.PERMISSIONS.READ_CALL_LOG,
         PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,
       ]);
-      console.log('Permissions are: ', permissions);
+      console.log('Permissions are:', permissions);
     } catch (err) {
       console.warn(err);
     }
   };
-
   startListenerTapped = () => {
     this.setState({featureOn: true});
     this.callDetector = new CallDetectorManager(
@@ -45,7 +43,7 @@ export default class App extends React.Component {
           this.setState({incoming: true, number});
         } else if (event === 'Offhook') {
           //Device call state: Off-hook.
-          // At least one call exists that is dialling,
+          // At least one call exists that is dialing,
           // active, or on hold,
           // and no calls are ringing or waiting.
           this.setState({incoming: true, number});
@@ -73,7 +71,7 @@ export default class App extends React.Component {
         <Text style={styles.text}>Should the detection be on?</Text>
         <TouchableHighlight
           onPress={
-            this.state.start
+            this.state.featureOn
               ? this.stopListenerTapped
               : this.startListenerTapped
           }>
@@ -83,13 +81,17 @@ export default class App extends React.Component {
               height: 200,
               justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor: this.state.start ? 'greenyellow' : 'red',
+              backgroundColor: this.state.featureOn
+                ? 'greenyellow'
+                : 'indianred',
             }}>
-            <Text style={styles.text}>{this.state.start ? `ON` : `OFF`} </Text>
+            <Text style={styles.text}>
+              {this.state.featureOn ? `ON` : `OFF`}{' '}
+            </Text>
           </View>
         </TouchableHighlight>
         {this.state.incoming && (
-          <Text style={{fontSize: 50}}>Incoming {this.state.number}</Text>
+          <Text style={{fontSize: 50}}>PUHELU {this.state.number}</Text>
         )}
       </View>
     );
@@ -106,4 +108,5 @@ const styles = StyleSheet.create({
     padding: 20,
     fontSize: 20,
   },
+  button: {},
 });
