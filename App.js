@@ -2,10 +2,11 @@
 import React from 'react';
 import {
   StyleSheet,
-  View,
   Text,
+  View,
   TouchableHighlight,
   PermissionsAndroid,
+  ActivityIndicator,
 } from 'react-native';
 import CallDetectorManager from 'react-native-call-detection';
 import {apikey} from './keys';
@@ -70,12 +71,16 @@ export default class App extends React.Component {
         }
       },
       true, // if you want to read the phone number of the incoming call [ANDROID], otherwise false
-      () => {}, // callback if your permission got denied [ANDROID] [only if you want to read incoming number] default: console.error
+      () => {},
+      // callback if your permission got denied [ANDROID] [only if
+      //you want to read incoming number] default: console.error
       {
         title: 'Phone State Permission',
         message:
           'This app needs access to your phone state in order to react and/or to adapt to incoming calls.',
-      }, // a custom permission request message to explain to your user, why you need the permission [recommended] - this is the default one
+      }, // a custom permission request message to explain to your
+      //user, why you need the permission [recommended] - this
+      // is the default one
     );
   };
   stopListenerTapped = () => {
@@ -88,7 +93,6 @@ export default class App extends React.Component {
     });
     this.callDetector && this.callDetector.dispose();
   };
-
   getNumberInfo = async (number) => {
     try {
       this.setState({loading: true});
@@ -97,12 +101,11 @@ export default class App extends React.Component {
           number,
         {
           method: 'GET',
-          headers: {
-            'API-key': apikey,
-          },
+          headers: {'API-key': apikey},
         },
       );
-      const info = await response.json(); // parses JSON response into native JavaScript objects
+      const info = await response.json();
+      // parses JSON response into native JavaScript objects
       if (info && info[0] && this.state.incoming) {
         this.setState({numberInfo: info[0], loading: false});
       } else {
@@ -115,7 +118,6 @@ export default class App extends React.Component {
       });
     }
   };
-
   render() {
     const {
       numberInfo,
@@ -125,8 +127,26 @@ export default class App extends React.Component {
       error,
       featureOn,
     } = this.state;
+    let result;
+    if (numberInfo && numberInfo.industry_code === '62010') {
+      result = (
+        <Text style={{fontSize: 40, textAlign: 'center'}}>
+          Potential employer!
+        </Text>
+      );
+    } else if (numberInfo && numberInfo.industry_code === '82200') {
+      result = (
+        <Text style={{fontSize: 40, textAlign: 'center'}}>
+          Just a telemarketer.
+        </Text>
+      );
+    } else {
+      result = (
+        <Text style={{fontSize: 40, textAlign: 'center'}}>No info, sorry.</Text>
+      );
+    }
     return (
-      <View style={styles.body}>
+      <View style={styles.container}>
         <Text style={styles.text}>Should the detection be on?</Text>
         <TouchableHighlight
           onPress={
@@ -140,21 +160,24 @@ export default class App extends React.Component {
               alignItems: 'center',
               backgroundColor: featureOn ? 'greenyellow' : 'indianred',
             }}>
-            <Text style={styles.text}>{featureOn ? `ON` : `OFF`} </Text>
+            <Text style={styles.text}>{featureOn ? `ON` : `OFF`}</Text>
           </View>
         </TouchableHighlight>
         {incoming && <Text style={{fontSize: 20}}>Call from {number}</Text>}
-        {loading && <Text style={{fontSize: 20}}>Loading information</Text>}
-        {numberInfo && (
-          <Text style={{fontSize: 20}}> {JSON.stringify(numberInfo)}</Text>
+        {loading && (
+          <View>
+            <Text style={{fontSize: 20}}>Loading information</Text>
+            <ActivityIndicator size="small" color="greenyellow" />
+          </View>
         )}
-        {error && <Text>Error occurred</Text>}
+        {numberInfo && result}
+        {error && <Text>Error occured</Text>}
       </View>
     );
   }
 }
 const styles = StyleSheet.create({
-  body: {
+  container: {
     backgroundColor: 'honeydew',
     justifyContent: 'center',
     alignItems: 'center',
@@ -164,5 +187,4 @@ const styles = StyleSheet.create({
     padding: 20,
     fontSize: 20,
   },
-  button: {},
 });
