@@ -52,7 +52,7 @@ export default class App extends React.Component {
         <Text style={styles.text}>Should the detection be on?</Text>
         <TouchableHighlight
           onPress={
-            this.state.start
+            this.state.featureOn
               ? this.stopListenerTapped
               : this.startListenerTapped
           }>
@@ -62,9 +62,11 @@ export default class App extends React.Component {
               height: 200,
               justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor: this.state.start ? 'greenyellow' : 'red',
+              backgroundColor: this.state.featureOn ? 'greenyellow' : 'red',
             }}>
-            <Text style={styles.text}>{this.state.start ? `ON` : `OFF`} </Text>
+            <Text style={styles.text}>
+              {this.state.featureOn ? `ON` : `OFF`}{' '}
+            </Text>
           </View>
         </TouchableHighlight>
         {this.state.incoming && (
