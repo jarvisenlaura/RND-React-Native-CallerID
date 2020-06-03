@@ -8,6 +8,8 @@ import {
   PermissionsAndroid,
 } from 'react-native';
 import CallDetectorManager from 'react-native-call-detection';
+import {apikey} from './keys';
+
 export default class App extends React.Component {
   constructor(props) {
     super(props);
@@ -15,6 +17,9 @@ export default class App extends React.Component {
       featureOn: false,
       incoming: false,
       number: null,
+      numberInfo: null,
+      loading: false,
+      error: null,
     };
   }
   componentDidMount() {
@@ -37,10 +42,17 @@ export default class App extends React.Component {
       (event, number) => {
         if (event === 'Disconnected') {
           // Do something call got disconnected
-          this.setState({incoming: false, number: null});
+          this.setState({
+            incoming: false,
+            number: null,
+            numberInfo: null,
+            error: null,
+            loading: false,
+          });
         } else if (event === 'Incoming') {
           // Do something call got incoming
           this.setState({incoming: true, number});
+          this.getNumberInfo(number);
         } else if (event === 'Offhook') {
           //Device call state: Off-hook.
           // At least one call exists that is dialing,
@@ -49,7 +61,12 @@ export default class App extends React.Component {
           this.setState({incoming: true, number});
         } else if (event === 'Missed') {
           // Do something call got missed
-          this.setState({incoming: false, number: null});
+          this.setState({
+            incoming: false,
+            number: null,
+            error: null,
+            loading: false,
+          });
         }
       },
       true, // if you want to read the phone number of the incoming call [ANDROID], otherwise false
@@ -62,18 +79,58 @@ export default class App extends React.Component {
     );
   };
   stopListenerTapped = () => {
-    this.setState({featureOn: false});
+    this.setState({
+      featureOn: false,
+      incoming: false,
+      number: null,
+      numberInfo: null,
+      error: null,
+    });
     this.callDetector && this.callDetector.dispose();
   };
+
+  getNumberInfo = async (number) => {
+    try {
+      this.setState({loading: true});
+      const response = await fetch(
+        `https://api.vainu.io/api/v1/prospects/filter/?country=FI&phone=` +
+          number,
+        {
+          method: 'GET',
+          headers: {
+            'API-key': apikey,
+          },
+        },
+      );
+      const info = await response.json(); // parses JSON response into native JavaScript objects
+      if (info && info[0] && this.state.incoming) {
+        this.setState({numberInfo: info[0], loading: false});
+      } else {
+        this.setState({numberInfo: [0], loading: false});
+      }
+    } catch (error) {
+      this.setState({
+        loading: false,
+        error: this.state.incoming ? error : null,
+      });
+    }
+  };
+
   render() {
+    const {
+      numberInfo,
+      incoming,
+      number,
+      loading,
+      error,
+      featureOn,
+    } = this.state;
     return (
       <View style={styles.body}>
         <Text style={styles.text}>Should the detection be on?</Text>
         <TouchableHighlight
           onPress={
-            this.state.featureOn
-              ? this.stopListenerTapped
-              : this.startListenerTapped
+            featureOn ? this.stopListenerTapped : this.startListenerTapped
           }>
           <View
             style={{
@@ -81,18 +138,17 @@ export default class App extends React.Component {
               height: 200,
               justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor: this.state.featureOn
-                ? 'greenyellow'
-                : 'indianred',
+              backgroundColor: featureOn ? 'greenyellow' : 'indianred',
             }}>
-            <Text style={styles.text}>
-              {this.state.featureOn ? `ON` : `OFF`}{' '}
-            </Text>
+            <Text style={styles.text}>{featureOn ? `ON` : `OFF`} </Text>
           </View>
         </TouchableHighlight>
-        {this.state.incoming && (
-          <Text style={{fontSize: 50}}>PUHELU {this.state.number}</Text>
+        {incoming && <Text style={{fontSize: 20}}>Call from {number}</Text>}
+        {loading && <Text style={{fontSize: 20}}>Loading information</Text>}
+        {numberInfo && (
+          <Text style={{fontSize: 20}}> {JSON.stringify(numberInfo)}</Text>
         )}
+        {error && <Text>Error occurred</Text>}
       </View>
     );
   }
