@@ -1,6 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import {StyleSheet, View, Text, TouchableHighlight} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableHighlight,
+  PermissionsAndroid,
+} from 'react-native';
 import CallDetectorManager from 'react-native-call-detection';
 
 export default class App extends React.Component {
@@ -12,6 +18,21 @@ export default class App extends React.Component {
       number: null,
     };
   }
+  componentDidMount() {
+    this.askPermission();
+  }
+  askPermission = async () => {
+    try {
+      const permissions = await PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.READ_CALL_LOG,
+        PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,
+      ]);
+      console.log('Permissions are: ', permissions);
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
   startListenerTapped = () => {
     this.setState({featureOn: true});
     this.callDetector = new CallDetectorManager(
