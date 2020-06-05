@@ -12,7 +12,11 @@
   "dependencies": {
     "react": "16.11.0",
     "react-native": "0.62.2",
-    "react-native-call-detection": "github:priteshrnandgaonkar/react-native-call-detection#d6e90c32188341b36508853eb743b9a475acdd5a"
+    "react-native-call-detection": "github:priteshrnandgaonkar/react-native-call-detection#d6e90c32188341b36508853eb743b9a475acdd5a",
+    "react-redux": "^7.2.0",
+    "redux": "^4.0.5",
+    "redux-devtools-extension": "^2.13.8",
+    "redux-saga": "^1.1.3"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
@@ -22,7 +26,8 @@
     "eslint": "^7.1.0",
     "jest": "^26.0.1",
     "metro-react-native-babel-preset": "^0.59.0",
-    "react-test-renderer": "16.11.0"
+    "react-test-renderer": "16.11.0",
+    "redux-devtools": "^3.5.0"
   },
   "jest": {
     "preset": "react-native"
